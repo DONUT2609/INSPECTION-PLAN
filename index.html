@@ -18,26 +18,33 @@
     --bg:#eef1f6;
     --card:#ffffff;
     --border:#dfe6ee;
-    --red:#e0384d;
-    --red-bg:#fdecee;
-    --yellow:#d9931b;
-    --yellow-bg:#fdf5e3;
-    --green:#1f9d64;
-    --green-bg:#eaf8f1;
+    --red:#d92d20;
+    --red-bg:#fbeae8;
+    --yellow:#b25e09;
+    --yellow-bg:#fdf1de;
+    --green:#0f7a3d;
+    --green-bg:#e7f6ec;
   }
   *{box-sizing:border-box;}
   html,body{
+    height:100%;
     font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     margin:0;
     padding:0;
     background:var(--bg);
     color:var(--text);
+    overflow:hidden;
+  }
+  body{
+    display:flex;
+    flex-direction:column;
   }
   header.global-header{
+    flex:0 0 auto;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:18px 32px;
+    padding:10px 28px;
     background:#ffffff;
     border-bottom:1px solid var(--border);
     box-shadow:0 2px 10px rgba(18,51,95,0.05);
@@ -77,63 +84,80 @@
     margin-top:3px;
   }
   .header-logo{
-    height:88px;
+    height:56px;
     width:auto;
   }
 
   .page{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
     width:100%;
-    margin:0 auto;
-    padding:28px 32px 70px 32px;
+    padding:8px 24px 8px 24px;
   }
 
   #statusMsg{
-    padding:10px 4px;
-    font-size:0.85rem;
+    flex:0 0 auto;
+    font-size:0.78rem;
     color:var(--muted);
   }
-  #statusMsg.error{color:var(--red);font-weight:700;}
+  #statusMsg:empty{display:none;}
+  #statusMsg:not(:empty){padding-bottom:6px;}
+  #statusMsg.error{color:var(--red);}
 
   .table-card{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
     background:var(--card);
-    border-radius:14px;
+    border-radius:12px;
     box-shadow:0 4px 18px rgba(15,42,74,0.08);
     overflow:hidden;
     border:1px solid var(--border);
   }
   .table-scroll{
-    overflow-x:auto;
+    flex:1 1 auto;
+    min-height:0;
+    overflow:auto;
   }
   table{
     width:100%;
     border-collapse:collapse;
-    font-size:0.86rem;
-    min-width:1300px;
+    font-size:0.82rem;
+    min-width:1200px;
   }
   thead th{
     background:var(--navy);
     color:#eef3fa;
     text-align:left;
-    padding:12px 10px;
-    font-size:0.78rem;
-    font-weight:600;
+    padding:10px 10px;
+    font-size:0.95rem;
+    font-weight:700;
     text-transform:uppercase;
-    letter-spacing:0.03em;
+    letter-spacing:0.02em;
     white-space:nowrap;
     position:sticky;
     top:0;
     z-index:2;
   }
-  thead tr.group-row th{
+  thead th[colspan]{
     text-align:center;
-    background:var(--navy-2);
-    border-top:1px solid rgba(255,255,255,0.1);
+  }
+  thead tr:last-child th{
+    text-align:center;
+    padding-top:4px;
+    padding-bottom:6px;
+    font-size:0.82rem;
+    background:var(--navy);
   }
   tbody td{
-    padding:11px 10px;
+    padding:6px 10px;
     border-bottom:1px solid var(--border);
     vertical-align:top;
     white-space:nowrap;
+    line-height:1.3;
   }
   tbody tr:hover{background:#f7f9fc;}
   tbody tr:nth-child(even){background:#fbfcfe;}
@@ -142,19 +166,24 @@
   .vessel-name{
     font-weight:800;
     color:var(--navy);
-    font-size:0.95rem;
+    font-size:0.9rem;
   }
   .cell-main{
     font-weight:700;
     display:block;
   }
+  .cell-tag{
+    font-weight:600;
+    font-size:0.68rem;
+    color:var(--muted);
+  }
   .cell-sub{
     display:block;
     font-weight:400;
     color:var(--text);
-    font-size:0.72rem;
+    font-size:0.7rem;
     white-space:normal;
-    margin-top:3px;
+    margin-top:1px;
   }
   td.cell-red .cell-main{color:var(--red);}
   td.cell-red{box-shadow:inset 3px 0 0 var(--red);background:var(--red-bg);}
@@ -163,30 +192,31 @@
   td.cell-yellow{box-shadow:inset 3px 0 0 var(--yellow);background:var(--yellow-bg);}
 
   td.cell-green .cell-main{color:var(--green);}
+  td.cell-green{box-shadow:inset 3px 0 0 var(--green);background:var(--green-bg);}
 
   td.cell-text{
     white-space:normal;
-    max-width:220px;
+    max-width:200px;
   }
   .muted-cell{color:var(--text);}
 
   .bottomTimestamp{
     position:fixed;
-    right:16px;
-    bottom:14px;
-    font-size:0.76rem;
+    right:14px;
+    bottom:10px;
+    font-size:0.72rem;
     color:var(--navy);
     background:rgba(255,255,255,0.96);
-    padding:7px 12px;
+    padding:5px 10px;
     border-radius:8px;
     border-left:4px solid var(--gold);
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
   }
 
   @media (max-width:900px){
-    header.global-header{padding:16px 18px;}
-    .header-logo{height:52px;}
-    .page{padding:18px 12px 70px 12px;}
+    header.global-header{padding:10px 16px;}
+    .header-logo{height:42px;}
+    .page{padding:10px 12px;}
   }
 </style>
 </head>
@@ -211,7 +241,7 @@
     <div class="table-scroll">
       <table id="fleetTable">
         <thead>
-          <tr class="group-row">
+          <tr>
             <th rowspan="2">Tàu</th>
             <th rowspan="2">Next SIRE</th>
             <th rowspan="2">Oil Major</th>
@@ -227,7 +257,7 @@
             <th rowspan="2">PSC gần nhất</th>
             <th rowspan="2">Remark</th>
           </tr>
-          <tr class="group-row">
+          <tr>
             <th>External</th>
             <th>Internal</th>
           </tr>
@@ -350,18 +380,32 @@ function classify(days, isCert) {
   return "cell-green";
 }
 
-function dateCellHTML(dateGroup, today, isCert) {
-  const { date, label } = dateGroup;
+function dateCellHTML(dateGroup, today, isCert, forcePlain) {
+  const { date, label, tag } = dateGroup;
   if (!date && !label) return { cls: "", html: "" };
   if (!date) {
     // chỉ có text mô tả, không có ngày cụ thể để tính đếm ngược
     return { cls: "", html: `<span class="cell-sub">${escapeHTML(label)}</span>` };
   }
   const days = daysBetween(today, date);
-  const cls = classify(days, isCert);
+  const cls = forcePlain ? "" : classify(days, isCert);
   let html = `<span class="cell-main">${formatDate(date)}</span>`;
+  if (tag) html += ` <span class="cell-tag">(${escapeHTML(tag)})</span>`;
   if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   return { cls, html };
+}
+
+// CGO AUD có 2 đợt (External / Internal), vẫn hiển thị đủ 2 cột.
+// Nhưng chỉ tô màu cảnh báo (đỏ/vàng/xanh) cho đợt nào có ngày GẦN với hôm nay
+// nhất (dù là quá hạn hay sắp tới) — đợt còn lại hiển thị ngày bình thường, không tô màu,
+// để tránh trường hợp 1 ngày đã quá hạn rất lâu (vd nhiều năm trước) vẫn bị báo đỏ song song.
+function pickCgoPlainFlags(extGroup, intGroup, today) {
+  if (!extGroup.date || !intGroup.date) return { extPlain: false, intPlain: false };
+  const distExt = Math.abs(daysBetween(today, extGroup.date));
+  const distInt = Math.abs(daysBetween(today, intGroup.date));
+  return distExt <= distInt
+    ? { extPlain: false, intPlain: true }
+    : { extPlain: true, intPlain: false };
 }
 
 function escapeHTML(s) {
@@ -453,8 +497,11 @@ function render(records) {
     const intAud = dateCellHTML(mergeDateGroup(rec, 8), today, false);
     const navAud = dateCellHTML(mergeDateGroup(rec, 9), today, false);
     const mooringAud = dateCellHTML(mergeDateGroup(rec, 10), today, false);
-    const cgoExt = dateCellHTML(mergeDateGroup(rec, 11), today, false);
-    const cgoInt = dateCellHTML(mergeDateGroup(rec, 12), today, false);
+    const cgoExtGroup = mergeDateGroup(rec, 11);
+    const cgoIntGroup = mergeDateGroup(rec, 12);
+    const cgoPlainFlags = pickCgoPlainFlags(cgoExtGroup, cgoIntGroup, today);
+    const cgoExt = dateCellHTML(cgoExtGroup, today, false, cgoPlainFlags.extPlain);
+    const cgoInt = dateCellHTML(cgoIntGroup, today, false, cgoPlainFlags.intPlain);
     const anNinh = dateCellHTML(mergeDateGroup(rec, 13), today, false);
     const dungQuat = mergeSimpleMulti(rec, [14, 15]);
     const psc = mergeSimple(rec, 16);
