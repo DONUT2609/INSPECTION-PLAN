@@ -157,7 +157,7 @@
     background:var(--navy);
   }
   tbody td{
-    padding:10px 6px;
+    padding:13px 6px;
     border-bottom:1px solid var(--border);
     vertical-align:middle;
     white-space:nowrap;
@@ -186,9 +186,9 @@
     display:block;
     font-weight:400;
     color:var(--text);
-    font-size:0.8rem;
+    font-size:0.88rem;
     white-space:normal;
-    margin-top:2px;
+    margin-top:3px;
     text-align:center;
   }
   td.cell-red .cell-main{color:var(--red);}
@@ -420,14 +420,15 @@ function dateCellHTML(dateGroup, today, isCert, forcePlain) {
   const cls = forcePlain ? "" : classify(days, isCert);
   // Nếu Sheet có 2 ngày hợp lệ khác nhau (vd hiệu lực từ - đến), hiển thị đủ cả khoảng
   // thay vì chỉ giữ ngày gần nhất và bỏ ngày còn lại.
-  let html;
-  if (prevDate) {
-    html = `<span class="cell-main">${formatDate(prevDate)} - ${formatDate(date)}</span>`;
-  } else {
-    html = `<span class="cell-main">${formatDate(date)}</span>`;
-  }
+  let html = `<span class="cell-main">${formatDate(date)}</span>`;
   if (tag) html += ` <span class="cell-tag">(${escapeHTML(tag)})</span>`;
-  if (label && !prevDate) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+  if (prevDate) {
+    // Có 2 ngày hợp lệ (vd hiệu lực từ - đến): giữ ngày sau làm mốc chính (đậm, tô màu cảnh báo),
+    // ngày đầu xuống dòng phụ nhỏ bên dưới để không tràn sang cột kế bên.
+    html += `<span class="cell-sub">(${formatDate(prevDate)})</span>`;
+  } else if (label) {
+    html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+  }
   return { cls, html };
 }
 
