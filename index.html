@@ -125,9 +125,10 @@
   }
   table{
     width:100%;
+    table-layout:fixed;
     border-collapse:collapse;
     font-size:0.95rem;
-    min-width:1200px;
+    min-width:1400px;
   }
   thead th{
     background:var(--navy);
@@ -138,7 +139,8 @@
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:0.02em;
-    white-space:nowrap;
+    white-space:normal;
+    word-break:break-word;
     position:sticky;
     top:0;
     z-index:2;
@@ -154,7 +156,7 @@
     background:var(--navy);
   }
   tbody td{
-    padding:10px 12px;
+    padding:10px 6px;
     border-bottom:1px solid var(--border);
     vertical-align:top;
     white-space:nowrap;
@@ -172,6 +174,7 @@
   .cell-main{
     font-weight:700;
     display:block;
+    text-align:center;
   }
   .cell-tag{
     font-weight:600;
@@ -185,6 +188,7 @@
     font-size:0.8rem;
     white-space:normal;
     margin-top:2px;
+    text-align:center;
   }
   td.cell-red .cell-main{color:var(--red);}
   td.cell-red{box-shadow:inset 3px 0 0 var(--red);background:var(--red-bg);}
@@ -238,6 +242,23 @@
   <div class="table-card">
     <div class="table-scroll">
       <table id="fleetTable">
+        <colgroup>
+          <col style="width:6%">
+          <col style="width:7%">
+          <col style="width:7%">
+          <col style="width:7.5%">
+          <col style="width:7.5%">
+          <col style="width:6.5%">
+          <col style="width:6.5%">
+          <col style="width:6.5%">
+          <col style="width:6.5%">
+          <col style="width:6%">
+          <col style="width:6%">
+          <col style="width:6.5%">
+          <col style="width:6%">
+          <col style="width:7.5%">
+          <col style="width:7%">
+        </colgroup>
         <thead>
           <tr>
             <th rowspan="2">Tàu</th>
