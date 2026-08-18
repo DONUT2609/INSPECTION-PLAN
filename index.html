@@ -106,8 +106,9 @@
   #statusMsg.error{color:var(--red);}
 
   .table-card{
-    flex:1 1 auto;
+    flex:0 1 auto;
     min-height:0;
+    max-height:100%;
     width:100%;
     display:flex;
     flex-direction:column;
@@ -133,7 +134,7 @@
   thead th{
     background:var(--navy);
     color:#eef3fa;
-    text-align:left;
+    text-align:center;
     padding:10px 10px;
     font-size:0.95rem;
     font-weight:700;
@@ -201,6 +202,12 @@
     max-width:200px;
   }
   .muted-cell{color:var(--text);}
+  .cell-oil{
+    display:block;
+    text-align:center;
+    font-weight:700;
+    color:var(--navy);
+  }
 
   .bottomTimestamp{
     position:fixed;
@@ -273,7 +280,7 @@
             <th colspan="2">CGO AUD</th>
             <th rowspan="2">An ninh</th>
             <th rowspan="2">Dung Quất</th>
-            <th rowspan="2">PSC gần nhất</th>
+            <th rowspan="2">LATEST PSC</th>
             <th rowspan="2">DRILL</th>
           </tr>
           <tr>
@@ -376,17 +383,20 @@ function daysBetween(from, to) {
 // -> trả về { date: Date|null, label: string }  (label = phần text không parse được ngày)
 function resolveDateGroup(candidates) {
   const clean = candidates.map(c => (c || "").trim()).filter(c => c.length > 0);
-  let bestDate = null;
+  let bestDate = null;   // ngày gần nhất/lớn nhất (dùng để tính đếm ngược + tô màu)
+  let firstDate = null;  // ngày nhỏ nhất, nếu có >=2 ngày hợp lệ khác nhau -> hiển thị đủ cả khoảng
   const labels = [];
   for (const c of clean) {
     const d = parseVNDate(c);
     if (d) {
       if (!bestDate || d > bestDate) bestDate = d;
+      if (!firstDate || d < firstDate) firstDate = d;
     } else {
       if (!labels.includes(c)) labels.push(c);
     }
   }
-  return { date: bestDate, label: labels.join(" | ") };
+  const prevDate = (firstDate && bestDate && firstDate.getTime() !== bestDate.getTime()) ? firstDate : null;
+  return { date: bestDate, prevDate, label: labels.join(" | ") };
 }
 
 // ---------- Render helpers ----------
@@ -400,7 +410,7 @@ function classify(days, isCert) {
 }
 
 function dateCellHTML(dateGroup, today, isCert, forcePlain) {
-  const { date, label, tag } = dateGroup;
+  const { date, prevDate, label, tag } = dateGroup;
   if (!date && !label) return { cls: "", html: "" };
   if (!date) {
     // chỉ có text mô tả, không có ngày cụ thể để tính đếm ngược
@@ -408,9 +418,16 @@ function dateCellHTML(dateGroup, today, isCert, forcePlain) {
   }
   const days = daysBetween(today, date);
   const cls = forcePlain ? "" : classify(days, isCert);
-  let html = `<span class="cell-main">${formatDate(date)}</span>`;
+  // Nếu Sheet có 2 ngày hợp lệ khác nhau (vd hiệu lực từ - đến), hiển thị đủ cả khoảng
+  // thay vì chỉ giữ ngày gần nhất và bỏ ngày còn lại.
+  let html;
+  if (prevDate) {
+    html = `<span class="cell-main">${formatDate(prevDate)} - ${formatDate(date)}</span>`;
+  } else {
+    html = `<span class="cell-main">${formatDate(date)}</span>`;
+  }
   if (tag) html += ` <span class="cell-tag">(${escapeHTML(tag)})</span>`;
-  if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+  if (label && !prevDate) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   return { cls, html };
 }
 
@@ -545,7 +562,7 @@ function render(records) {
     tr.innerHTML = `
       <td class="vessel-name">${escapeHTML(name)}</td>
       <td class="${nextSire.cls}">${nextSire.html}</td>
-      <td class="muted-cell">${escapeHTML(oilMajor)}</td>
+      <td><span class="cell-oil">${escapeHTML(oilMajor)}</span></td>
       <td class="${smcIssc.cls}">${smcIssc.html}</td>
       <td class="${mlc.cls}">${mlc.html}</td>
       <td class="${supt.cls}">${supt.html}</td>
