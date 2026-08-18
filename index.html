@@ -151,35 +151,24 @@
   .cell-sub{
     display:block;
     font-weight:400;
-    color:var(--muted);
+    color:var(--text);
     font-size:0.72rem;
     white-space:normal;
     margin-top:3px;
   }
-  .badge{
-    display:inline-block;
-    margin-top:4px;
-    padding:1px 7px;
-    border-radius:999px;
-    font-size:0.68rem;
-    font-weight:700;
-  }
   td.cell-red .cell-main{color:var(--red);}
-  td.cell-red .badge{background:var(--red-bg);color:var(--red);}
   td.cell-red{box-shadow:inset 3px 0 0 var(--red);background:var(--red-bg);}
 
   td.cell-yellow .cell-main{color:var(--yellow);}
-  td.cell-yellow .badge{background:var(--yellow-bg);color:var(--yellow);}
   td.cell-yellow{box-shadow:inset 3px 0 0 var(--yellow);background:var(--yellow-bg);}
 
   td.cell-green .cell-main{color:var(--green);}
-  td.cell-green .badge{background:var(--green-bg);color:var(--green);}
 
   td.cell-text{
     white-space:normal;
     max-width:220px;
   }
-  .muted-cell{color:var(--muted);}
+  .muted-cell{color:var(--text);}
 
   .bottomTimestamp{
     position:fixed;
@@ -370,8 +359,7 @@ function dateCellHTML(dateGroup, today, isCert) {
   }
   const days = daysBetween(today, date);
   const cls = classify(days, isCert);
-  const daysLabel = days < 0 ? `Quá hạn ${Math.abs(days)} ngày` : `Còn ${days} ngày`;
-  let html = `<span class="cell-main">${formatDate(date)}</span><span class="badge">${daysLabel}</span>`;
+  let html = `<span class="cell-main">${formatDate(date)}</span>`;
   if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   return { cls, html };
 }
