@@ -551,8 +551,21 @@ function render(records) {
     const name = cellVal(rec.primary, 0);
     const nextSire = dateCellHTML(mergeDateGroup(rec, 1), today, false);
     const oilMajor = mergeSimple(rec, 2);
-    const smcIssc = dateCellHTML(mergeCertGroup(rec, 3, 4), today, true);
-    const mlc = dateCellHTML(mergeCertGroup(rec, 5, 6), today, true);
+    const smcGroup = mergeCertGroup(rec, 3, 4);
+    let mlcGroup = mergeCertGroup(rec, 5, 6);
+    if (!mlcGroup.date && !mlcGroup.label) {
+      // Một số tàu dùng 1 chứng nhận chung cho cả SMC/ISSC và MLC (1 ô merge cả 4 cột trên Sheet),
+      // nên dữ liệu chỉ rơi vào 2 cột SMC/ISSC, còn 2 cột MLC trống. Trường hợp này MLC dùng chung
+      // giá trị với SMC/ISSC thay vì để trống.
+      mlcGroup = smcGroup;
+    } else if (!mlcGroup.label && smcGroup.label) {
+      // MLC có ngày riêng (tách ra để cảnh báo riêng) nhưng ghi chú "khung thời gian khảo sát"
+      // là 1 ô dùng chung cho cả SMC/ISSC và MLC -> hiển thị ghi chú đó ở cả 2 cột, vẫn giữ
+      // nguyên ngày riêng của MLC.
+      mlcGroup = { ...mlcGroup, label: smcGroup.label };
+    }
+    const smcIssc = dateCellHTML(smcGroup, today, true);
+    const mlc = dateCellHTML(mlcGroup, today, true);
     const supt = dateCellHTML(mergeDateGroup(rec, 7), today, false);
     const intAud = dateCellHTML(mergeDateGroup(rec, 8), today, false);
     const navAud = dateCellHTML(mergeDateGroup(rec, 9), today, false);
