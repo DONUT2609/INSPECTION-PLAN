@@ -566,6 +566,12 @@ function render(records) {
     }
     const smcIssc = dateCellHTML(smcGroup, today, true);
     const mlc = dateCellHTML(mlcGroup, today, true);
+    // Khi SMC/ISSC và MLC trùng khớp hoàn toàn (cùng 1 chứng nhận, cùng ngày) -> gộp 2 ô
+    // thành 1 ô rộng để đỡ rối mắt, thay vì lặp lại y hệt 2 lần.
+    const certMerged = !!smcIssc.html && smcIssc.html === mlc.html;
+    const certCellsHTML = certMerged
+      ? `<td colspan="2" class="${smcIssc.cls}">${smcIssc.html}</td>`
+      : `<td class="${smcIssc.cls}">${smcIssc.html}</td><td class="${mlc.cls}">${mlc.html}</td>`;
     const supt = dateCellHTML(mergeDateGroup(rec, 7), today, false);
     const intAud = dateCellHTML(mergeDateGroup(rec, 8), today, false);
     const navAud = dateCellHTML(mergeDateGroup(rec, 9), today, false);
@@ -586,8 +592,7 @@ function render(records) {
       <td class="vessel-name">${escapeHTML(name)}</td>
       <td class="${nextSire.cls}">${nextSire.html}</td>
       <td><span class="cell-oil">${escapeHTML(oilMajor)}</span></td>
-      <td class="${smcIssc.cls}">${smcIssc.html}</td>
-      <td class="${mlc.cls}">${mlc.html}</td>
+      ${certCellsHTML}
       <td class="${supt.cls}">${supt.html}</td>
       <td class="${intAud.cls}">${intAud.html}</td>
       <td class="${navAud.cls}">${navAud.html}</td>
