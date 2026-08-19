@@ -171,6 +171,7 @@
     font-weight:800;
     color:var(--navy);
     font-size:1.02rem;
+    text-align:center;
   }
   .cell-main{
     font-weight:700;
@@ -201,7 +202,14 @@
     white-space:normal;
     max-width:200px;
   }
-  .muted-cell{color:var(--text);}
+  .muted-cell{color:var(--text);text-align:center;}
+  .cell-check{text-align:center;}
+  .check-yes{
+    display:inline-block;
+    color:var(--navy);
+    font-weight:800;
+    font-size:1.05rem;
+  }
   .cell-oil{
     display:block;
     text-align:center;
@@ -262,6 +270,7 @@
           <col style="width:6%">
           <col style="width:6%">
           <col style="width:6.5%">
+          <col style="width:4%">
           <col style="width:6%">
           <col style="width:7.5%">
           <col style="width:7%">
@@ -279,6 +288,7 @@
             <th rowspan="2">Mooring AUD</th>
             <th colspan="2">CGO AUD</th>
             <th rowspan="2">An ninh</th>
+            <th rowspan="2">SX</th>
             <th rowspan="2">Dung Quất</th>
             <th rowspan="2">LATEST PSC</th>
             <th rowspan="2">DRILL</th>
@@ -555,7 +565,8 @@ function render(records) {
     const cgoExt = dateCellHTML(cgoExtGroup, today, false, cgoPlainFlags.extPlain);
     const cgoInt = dateCellHTML(cgoIntGroup, today, false, cgoPlainFlags.intPlain);
     const anNinh = dateCellHTML(mergeDateGroup(rec, 13), today, false);
-    const dungQuat = mergeSimpleMulti(rec, [14, 15]);
+    const sxDone = mergeSimple(rec, 14).trim().toUpperCase() === "TRUE";
+    const dungQuat = mergeSimple(rec, 15);
     const psc = mergeSimple(rec, 16);
     const drill = dateCellHTML(mergeDateGroup(rec, 17), today, false);
 
@@ -573,6 +584,7 @@ function render(records) {
       <td class="${cgoExt.cls}">${cgoExt.html}</td>
       <td class="${cgoInt.cls}">${cgoInt.html}</td>
       <td class="${anNinh.cls}">${anNinh.html}</td>
+      <td class="cell-check">${sxDone ? '<span class="check-yes">&#10003;</span>' : ''}</td>
       <td class="muted-cell">${escapeHTML(dungQuat)}</td>
       <td class="cell-text muted-cell">${textCell(psc)}</td>
       <td class="cell-text ${drill.cls}">${drill.html}</td>
