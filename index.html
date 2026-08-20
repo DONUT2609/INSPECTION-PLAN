@@ -20,9 +20,8 @@
     --card:#ffffff;
     --border:#dfe6ee;
     --red:#e60124;
-    --red-bg:#fde6ea;
-    --yellow:#ff7a00;
-    --yellow-bg:#fff4e0;
+    --yellow:#ffa800;
+    --orange:#ff7a00;
   }
   *{box-sizing:border-box;}
   html,body{
@@ -43,7 +42,7 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:10px 12px;
+    padding:10px 24px;
     background:#ffffff;
     border-bottom:1px solid var(--border);
     box-shadow:0 2px 10px rgba(18,51,95,0.05);
@@ -93,7 +92,7 @@
     display:flex;
     flex-direction:column;
     width:100%;
-    padding:8px 10px 8px 10px;
+    padding:8px 24px 8px 24px;
   }
 
   #statusMsg{
@@ -108,7 +107,6 @@
   .table-card{
     flex:1 1 auto;
     min-height:0;
-    max-height:100%;
     width:100%;
     display:flex;
     flex-direction:column;
@@ -129,12 +127,12 @@
     table-layout:fixed;
     border-collapse:collapse;
     font-size:0.95rem;
-    min-width:1000px;
+    min-width:1400px;
   }
   thead th{
     background:var(--navy);
     color:#eef3fa;
-    text-align:center;
+    text-align:left;
     padding:10px 10px;
     font-size:0.95rem;
     font-weight:700;
@@ -145,6 +143,7 @@
     position:sticky;
     top:0;
     z-index:2;
+    border:1px solid #274a72;
   }
   thead th[colspan]{
     text-align:center;
@@ -157,9 +156,9 @@
     background:var(--navy);
   }
   tbody td{
-    padding:13px 6px;
-    border-bottom:1px solid var(--border);
-    vertical-align:middle;
+    padding:10px 6px;
+    border:1px solid var(--border);
+    vertical-align:top;
     white-space:nowrap;
     line-height:1.5;
   }
@@ -171,13 +170,11 @@
     font-weight:800;
     color:var(--navy);
     font-size:1.02rem;
-    text-align:center;
   }
   .cell-main{
     font-weight:700;
     display:block;
     text-align:center;
-    font-size:1.08em;
   }
   .cell-tag{
     font-weight:600;
@@ -188,35 +185,35 @@
     display:block;
     font-weight:400;
     color:var(--text);
-    font-size:0.88rem;
+    font-size:0.8rem;
     white-space:normal;
-    margin-top:3px;
+    margin-top:2px;
     text-align:center;
   }
-  td.cell-red .cell-main{color:var(--red);}
-  td.cell-red{box-shadow:inset 3px 0 0 var(--red);background:var(--red-bg);}
+  td.cell-red{background:var(--red);}
+  td.cell-red .cell-main,
+  td.cell-red .cell-sub,
+  td.cell-red .cell-tag{color:#ffffff;}
 
-  td.cell-yellow .cell-main{color:var(--yellow);}
-  td.cell-yellow{box-shadow:inset 3px 0 0 var(--yellow);background:var(--yellow-bg);}
+  td.cell-yellow{background:var(--yellow);}
+  td.cell-yellow .cell-main,
+  td.cell-yellow .cell-sub,
+  td.cell-yellow .cell-tag{color:#1c2733;}
+
+  .window-badge{
+    display:inline-block;
+    background:var(--orange);
+    color:#ffffff;
+    padding:1px 7px;
+    border-radius:4px;
+    font-weight:700;
+  }
 
   td.cell-text{
     white-space:normal;
     max-width:200px;
   }
-  .muted-cell{color:var(--text);text-align:center;}
-  .cell-check{text-align:center;}
-  .check-yes{
-    display:inline-block;
-    color:var(--navy);
-    font-weight:800;
-    font-size:1.05rem;
-  }
-  .cell-oil{
-    display:block;
-    text-align:center;
-    font-weight:700;
-    color:var(--navy);
-  }
+  .muted-cell{color:var(--text);}
 
   .bottomTimestamp{
     position:fixed;
@@ -235,20 +232,6 @@
     header.global-header{padding:10px 12px;}
     .header-logo{height:42px;}
     .page{padding:10px 12px;}
-  }
-
-  /* Màn hình thấp (vd laptop 1600x783): thu gọn khoảng đệm/cỡ chữ để vừa 1 màn hình,
-     đỡ phải cuộn trong khung bảng. Màn hình cao hơn 800px vẫn giữ cỡ chữ/độ giãn dòng lớn hơn. */
-  @media (max-height:800px){
-    header.global-header{padding:5px 12px;}
-    .header-logo{height:34px;}
-    .page{padding:3px 10px;}
-    table{font-size:0.82rem;}
-    thead th{padding:5px 6px;font-size:0.8rem;white-space:normal;word-break:normal;}
-    thead tr:last-child th{padding-top:2px;padding-bottom:2px;font-size:0.7rem;}
-    tbody td{padding:5px 6px;line-height:1.25;}
-    .cell-sub{font-size:0.74rem;margin-top:1px;}
-    .vessel-name{font-size:0.88rem;}
   }
 </style>
 </head>
@@ -273,7 +256,7 @@
     <div class="table-scroll">
       <table id="fleetTable">
         <colgroup>
-          <col style="width:5%">
+          <col style="width:6%">
           <col style="width:7%">
           <col style="width:7%">
           <col style="width:7.5%">
@@ -285,9 +268,9 @@
           <col style="width:6%">
           <col style="width:6%">
           <col style="width:6.5%">
-          <col style="width:6.5%">
-          <col style="width:6.5%">
-          <col style="width:9%">
+          <col style="width:6%">
+          <col style="width:7.5%">
+          <col style="width:7%">
         </colgroup>
         <thead>
           <tr>
@@ -303,8 +286,8 @@
             <th colspan="2">CGO AUD</th>
             <th rowspan="2">An ninh</th>
             <th rowspan="2">Dung Quất</th>
-            <th rowspan="2">LATEST PSC</th>
-            <th rowspan="2">DRILL</th>
+            <th rowspan="2">PSC gần nhất</th>
+            <th rowspan="2">Remark</th>
           </tr>
           <tr>
             <th>External</th>
@@ -327,7 +310,7 @@
    để phản ánh thay đổi khi file Excel trên Drive được cập nhật.
    ============================================================ */
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfBqmSe7nZay8OhuH4EpblhueYbNWzZw0B6DAWjvgt0WEWstt3VLeVonIdZgNhgvTeEhfc7lnMWixn/pub?output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTM_YZC4Dbtbe6IsfGXZFSuH4XhDBOqXpbnyoH1DghL3Kue9kaRbBmmUEsLdhdEFg/pub?output=csv";
 const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 phút
 
 // Ngưỡng cảnh báo (số ngày còn lại)
@@ -406,20 +389,17 @@ function daysBetween(from, to) {
 // -> trả về { date: Date|null, label: string }  (label = phần text không parse được ngày)
 function resolveDateGroup(candidates) {
   const clean = candidates.map(c => (c || "").trim()).filter(c => c.length > 0);
-  let bestDate = null;   // ngày gần nhất/lớn nhất (dùng để tính đếm ngược + tô màu)
-  let firstDate = null;  // ngày nhỏ nhất, nếu có >=2 ngày hợp lệ khác nhau -> hiển thị đủ cả khoảng
+  let bestDate = null;
   const labels = [];
   for (const c of clean) {
     const d = parseVNDate(c);
     if (d) {
       if (!bestDate || d > bestDate) bestDate = d;
-      if (!firstDate || d < firstDate) firstDate = d;
     } else {
       if (!labels.includes(c)) labels.push(c);
     }
   }
-  const prevDate = (firstDate && bestDate && firstDate.getTime() !== bestDate.getTime()) ? firstDate : null;
-  return { date: bestDate, prevDate, label: labels.join(" | ") };
+  return { date: bestDate, label: labels.join(" | ") };
 }
 
 // ---------- Render helpers ----------
@@ -433,7 +413,7 @@ function classify(days, isCert) {
 }
 
 function dateCellHTML(dateGroup, today, isCert, forcePlain) {
-  const { date, prevDate, label, tag } = dateGroup;
+  const { date, label, tag } = dateGroup;
   if (!date && !label) return { cls: "", html: "" };
   if (!date) {
     // chỉ có text mô tả, không có ngày cụ thể để tính đếm ngược
@@ -441,17 +421,64 @@ function dateCellHTML(dateGroup, today, isCert, forcePlain) {
   }
   const days = daysBetween(today, date);
   const cls = forcePlain ? "" : classify(days, isCert);
-  // Nếu Sheet có 2 ngày hợp lệ khác nhau (vd hiệu lực từ - đến), hiển thị đủ cả khoảng
-  // thay vì chỉ giữ ngày gần nhất và bỏ ngày còn lại.
   let html = `<span class="cell-main">${formatDate(date)}</span>`;
   if (tag) html += ` <span class="cell-tag">(${escapeHTML(tag)})</span>`;
-  if (prevDate) {
-    // Có 2 ngày hợp lệ (vd hiệu lực từ - đến): giữ ngày sau làm mốc chính (đậm, tô màu cảnh báo),
-    // ngày đầu xuống dòng phụ nhỏ bên dưới để không tràn sang cột kế bên.
-    html += `<span class="cell-sub">(${formatDate(prevDate)})</span>`;
-  } else if (label) {
-    html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+  if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+  return { cls, html };
+}
+
+// Dành riêng cho SMC/ISSC và MLC: đôi khi có 2 ngày cùng ngày+tháng, khác năm
+// (vd 06/05/2026 và 06/05/2027) — đó là 1 "khung thời gian" (window), không phải
+// 2 mốc độc lập. Ngày LỚN hơn (mốc hết hạn thật) vẫn tô đỏ/vàng/xanh như bình
+// thường theo ngưỡng chứng chỉ (120/180 ngày). Ngày NHỎ hơn (mốc mở khung) chỉ
+// cần báo cam khi hôm nay đã đi qua nó, để nhắc là khung đã mở.
+function resolveCertGroup(candidates) {
+  const clean = candidates.map(c => (c || "").trim()).filter(c => c.length > 0);
+  const dates = [];
+  const labels = [];
+  for (const c of clean) {
+    const d = parseVNDate(c);
+    if (d) dates.push(d);
+    else if (!labels.includes(c)) labels.push(c);
   }
+  let mainDate = null;
+  let windowStart = null;
+  if (dates.length >= 2) {
+    let pairFound = false;
+    for (let i = 0; i < dates.length && !pairFound; i++) {
+      for (let j = i + 1; j < dates.length; j++) {
+        const a = dates[i], b = dates[j];
+        if (a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() !== b.getFullYear()) {
+          windowStart = a < b ? a : b;
+          mainDate = a < b ? b : a;
+          pairFound = true;
+          break;
+        }
+      }
+    }
+    if (!pairFound) mainDate = dates.reduce((m, d) => (d > m ? d : m), dates[0]);
+  } else if (dates.length === 1) {
+    mainDate = dates[0];
+  }
+  return { date: mainDate, windowStart, label: labels.join(" | ") };
+}
+
+function certCellHTML(group, today) {
+  const { date, windowStart, label } = group;
+  if (!date && !label) return { cls: "", html: "" };
+  if (!date) {
+    return { cls: "", html: `<span class="cell-sub">${escapeHTML(label)}</span>` };
+  }
+  const days = daysBetween(today, date);
+  const cls = classify(days, true);
+  let html = `<span class="cell-main">${formatDate(date)}</span>`;
+  if (windowStart) {
+    const started = daysBetween(today, windowStart) <= 0; // hôm nay đã qua mốc mở khung
+    html += started
+      ? `<span class="window-badge">${formatDate(windowStart)}</span>`
+      : `<span class="cell-sub">${formatDate(windowStart)}</span>`;
+  }
+  if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   return { cls, html };
 }
 
@@ -504,21 +531,6 @@ function buildVesselRecords(rows) {
   return records;
 }
 
-// Đọc ô "mốc thời gian cập nhật" do Apps Script ghi vào Sheet mỗi khi có người sửa dữ liệu.
-// Quy ước: một ô bất kỳ trong Sheet (đặt ở vùng trống, không dùng cho bảng tàu, ví dụ cột T/U)
-// chứa chữ "LAST_UPDATE", và ô ngay bên phải nó chứa chuỗi thời gian (Apps Script tự ghi).
-// Quét toàn bộ ô (không cố định cột/dòng) để không bị vướng các ô merge của tiêu đề/khung bảng.
-function findSheetTimestamp(rows) {
-  for (const r of rows) {
-    for (let i = 0; i < r.length; i++) {
-      if ((r[i] || "").trim().toUpperCase() === "LAST_UPDATE") {
-        return (r[i + 1] || "").trim();
-      }
-    }
-  }
-  return "";
-}
-
 function cellVal(row, idx) {
   return row && row[idx] !== undefined ? row[idx].trim() : "";
 }
@@ -544,7 +556,7 @@ function mergeCertGroup(records, idxA, idxB) {
   cont.forEach(row => {
     candidates.push(cellVal(row, idxA), cellVal(row, idxB));
   });
-  return resolveDateGroup(candidates);
+  return resolveCertGroup(candidates);
 }
 
 // Cho các cột 1 ngày duy nhất (Next SIRE, SUPT, INT AUD, NAV AUD, CGO AUD, An ninh):
@@ -566,27 +578,8 @@ function render(records) {
     const name = cellVal(rec.primary, 0);
     const nextSire = dateCellHTML(mergeDateGroup(rec, 1), today, false);
     const oilMajor = mergeSimple(rec, 2);
-    const smcGroup = mergeCertGroup(rec, 3, 4);
-    let mlcGroup = mergeCertGroup(rec, 5, 6);
-    if (!mlcGroup.date && !mlcGroup.label) {
-      // Một số tàu dùng 1 chứng nhận chung cho cả SMC/ISSC và MLC (1 ô merge cả 4 cột trên Sheet),
-      // nên dữ liệu chỉ rơi vào 2 cột SMC/ISSC, còn 2 cột MLC trống. Trường hợp này MLC dùng chung
-      // giá trị với SMC/ISSC thay vì để trống.
-      mlcGroup = smcGroup;
-    } else if (!mlcGroup.label && smcGroup.label) {
-      // MLC có ngày riêng (tách ra để cảnh báo riêng) nhưng ghi chú "khung thời gian khảo sát"
-      // là 1 ô dùng chung cho cả SMC/ISSC và MLC -> hiển thị ghi chú đó ở cả 2 cột, vẫn giữ
-      // nguyên ngày riêng của MLC.
-      mlcGroup = { ...mlcGroup, label: smcGroup.label };
-    }
-    const smcIssc = dateCellHTML(smcGroup, today, true);
-    const mlc = dateCellHTML(mlcGroup, today, true);
-    // Khi SMC/ISSC và MLC trùng khớp hoàn toàn (cùng 1 chứng nhận, cùng ngày) -> gộp 2 ô
-    // thành 1 ô rộng để đỡ rối mắt, thay vì lặp lại y hệt 2 lần.
-    const certMerged = !!smcIssc.html && smcIssc.html === mlc.html;
-    const certCellsHTML = certMerged
-      ? `<td colspan="2" class="${smcIssc.cls}">${smcIssc.html}</td>`
-      : `<td class="${smcIssc.cls}">${smcIssc.html}</td><td class="${mlc.cls}">${mlc.html}</td>`;
+    const smcIssc = certCellHTML(mergeCertGroup(rec, 3, 4), today);
+    const mlc = certCellHTML(mergeCertGroup(rec, 5, 6), today);
     const supt = dateCellHTML(mergeDateGroup(rec, 7), today, false);
     const intAud = dateCellHTML(mergeDateGroup(rec, 8), today, false);
     const navAud = dateCellHTML(mergeDateGroup(rec, 9), today, false);
@@ -597,17 +590,17 @@ function render(records) {
     const cgoExt = dateCellHTML(cgoExtGroup, today, false, cgoPlainFlags.extPlain);
     const cgoInt = dateCellHTML(cgoIntGroup, today, false, cgoPlainFlags.intPlain);
     const anNinh = dateCellHTML(mergeDateGroup(rec, 13), today, false);
-    const sxDone = mergeSimple(rec, 14).trim().toUpperCase() === "TRUE";
-    const dungQuat = mergeSimple(rec, 15);
+    const dungQuat = mergeSimpleMulti(rec, [14, 15]);
     const psc = mergeSimple(rec, 16);
-    const drill = dateCellHTML(mergeDateGroup(rec, 17), today, false);
+    const remark = mergeSimple(rec, 17);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="vessel-name">${escapeHTML(name)}</td>
       <td class="${nextSire.cls}">${nextSire.html}</td>
-      <td><span class="cell-oil">${escapeHTML(oilMajor)}</span></td>
-      ${certCellsHTML}
+      <td class="muted-cell">${escapeHTML(oilMajor)}</td>
+      <td class="${smcIssc.cls}">${smcIssc.html}</td>
+      <td class="${mlc.cls}">${mlc.html}</td>
       <td class="${supt.cls}">${supt.html}</td>
       <td class="${intAud.cls}">${intAud.html}</td>
       <td class="${navAud.cls}">${navAud.html}</td>
@@ -615,9 +608,9 @@ function render(records) {
       <td class="${cgoExt.cls}">${cgoExt.html}</td>
       <td class="${cgoInt.cls}">${cgoInt.html}</td>
       <td class="${anNinh.cls}">${anNinh.html}</td>
-      <td class="muted-cell">${sxDone ? '<span class="check-yes">&#10003;</span> ' : ''}${escapeHTML(dungQuat)}</td>
+      <td class="muted-cell">${escapeHTML(dungQuat)}</td>
       <td class="cell-text muted-cell">${textCell(psc)}</td>
-      <td class="cell-text ${drill.cls}">${drill.html}</td>
+      <td class="cell-text muted-cell">${textCell(remark)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -639,18 +632,14 @@ async function loadData() {
     if (records.length === 0) throw new Error("Không tìm thấy dữ liệu tàu trong CSV");
     render(records);
     statusMsg.textContent = "";
-    // Ưu tiên 1: mốc "LAST_UPDATE" do Apps Script ghi vào Sheet mỗi lần có người sửa dữ liệu
-    // (xem hướng dẫn cài đặt Apps Script kèm theo) -> đúng giờ sửa Sheet thật sự.
-    // Ưu tiên 2: header Last-Modified nếu Google có trả (CSV publish thường không có).
-    // Ưu tiên 3 (dự phòng): giờ tải trang, ghi rõ để không gây hiểu nhầm là giờ cập nhật dữ liệu.
-    const sheetTimestamp = findSheetTimestamp(rows);
+    // Google có thể trả header Last-Modified phản ánh lần sheet được publish lại gần nhất.
+    // Nếu trình duyệt đọc được thì đó là thời điểm dữ liệu thật sự thay đổi; nếu không có,
+    // phải nói rõ đây chỉ là giờ tải trang, tránh làm người xem tưởng nhầm là giờ cập nhật dữ liệu.
     const lastModified = res.headers.get("last-modified");
     statusMsg.className = "";
     const now = new Date();
     const tsEl = document.getElementById("bottomTimestamp");
-    if (sheetTimestamp) {
-      tsEl.textContent = "Dữ liệu (sheet) cập nhật lúc: " + sheetTimestamp;
-    } else if (lastModified) {
+    if (lastModified) {
       const d = new Date(lastModified);
       tsEl.textContent = "Dữ liệu (sheet) cập nhật lúc: " + d.toLocaleString("vi-VN");
     } else {
