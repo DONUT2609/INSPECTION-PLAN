@@ -399,8 +399,8 @@ function formatDate(d) {
   if (!d) return "";
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
+  const yy = String(d.getFullYear() % 100).padStart(2, "0");
+  return `${dd}/${mm}/${yy}`;
 }
 
 function daysBetween(from, to) {
@@ -497,14 +497,17 @@ function certCellHTML(group, today) {
   const days = daysBetween(today, date);
   // Trường hợp mốc nhỏ hơn của 1 khung thời gian nằm ở CỘT KHÁC (vd SMC/ISSC vs MLC
   // của ACF/AVS/AMS: cùng ngày+tháng, khác năm, nhưng mỗi ngày nằm ở 1 cột riêng).
-  // Thời gian/điều kiện cảnh báo (đỏ/vàng/an toàn) vẫn giữ nguyên như bình thường;
-  // CHỈ THÊM: nếu hôm nay đã đi qua mốc nhỏ hơn này rồi thì đổi sang nhãn cam thay vì
-  // đỏ/vàng, để phân biệt đây là mốc mở khung đã qua chứ không phải hạn sắp tới.
-  // Nếu CHƯA tới hạn (như tàu AVS) thì vẫn báo màu theo ngưỡng bình thường, không cam.
-  if (crossWindowStart && days <= 0) {
-    let html = `<span class="window-badge">${formatDate(date)}</span>`;
-    if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
-    return { cls: "", html };
+  // Đây không phải hạn thật (hạn thật là ngày lớn hơn ở cột kia), nên không bao giờ tô
+  // đỏ/vàng cho ô này: hễ đã qua hạn HOẶC đang trong vùng cảnh báo đỏ/vàng theo ngưỡng
+  // bình thường thì đổi thành báo cam. Chỉ khi còn AN TOÀN (như tàu AVS, còn rất xa) mới
+  // hiển thị bình thường, không màu — giữ nguyên điều kiện/ngưỡng thời gian như cũ.
+  if (crossWindowStart) {
+    const wouldAlarm = days <= 0 || classify(days, true) !== "";
+    if (wouldAlarm) {
+      let html = `<span class="window-badge">${formatDate(date)}</span>`;
+      if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+      return { cls: "", html };
+    }
   }
   const cls = classify(days, true);
   let html = `<span class="cell-main">${formatDate(date)}</span>`;
@@ -639,10 +642,21 @@ function render(records) {
     const nextSire = dateCellHTML(mergeDateGroup(rec, 1), today, false);
     const oilMajor = mergeSimple(rec, 2);
     const smcIsscGroup = mergeCertGroup(rec, 3, 4);
-    const mlcGroup = mergeCertGroup(rec, 5, 6);
+    let mlcGroup = mergeCertGroup(rec, 5, 6);
+    if (!mlcGroup.date && !mlcGroup.label) {
+      // MLC không có dữ liệu riêng -> nhiều tàu dùng chung 1 chứng nhận cho cả SMC/ISSC
+      // và MLC (chỉ ghi 1 lần ở cột SMC/ISSC), nên dùng chung giá trị thay vì để trống.
+      mlcGroup = smcIsscGroup;
+    }
     const crossed = applyCrossCertWindow(smcIsscGroup, mlcGroup);
     const smcIssc = certCellHTML(crossed.smc, today);
     const mlc = certCellHTML(crossed.mlc, today);
+    // Khi SMC/ISSC và MLC ra kết quả hiển thị giống hệt nhau (dùng chung chứng nhận) ->
+    // gộp thành 1 ô rộng (colspan 2) cho đỡ lặp lại, thay vì hiện y hệt 2 lần.
+    const certMerged = !!smcIssc.html && smcIssc.html === mlc.html;
+    const certCellsHTML = certMerged
+      ? `<td colspan="2" class="${smcIssc.cls}">${smcIssc.html}</td>`
+      : `<td class="${smcIssc.cls}">${smcIssc.html}</td><td class="${mlc.cls}">${mlc.html}</td>`;
     const supt = dateCellHTML(mergeDateGroup(rec, 7), today, false);
     const intAud = dateCellHTML(mergeDateGroup(rec, 8), today, false);
     const navAud = dateCellHTML(mergeDateGroup(rec, 9), today, false);
@@ -668,8 +682,7 @@ function render(records) {
       <td class="vessel-name">${escapeHTML(name)}</td>
       <td class="${nextSire.cls}">${nextSire.html}</td>
       <td class="muted-cell">${escapeHTML(oilMajor)}</td>
-      <td class="${smcIssc.cls}">${smcIssc.html}</td>
-      <td class="${mlc.cls}">${mlc.html}</td>
+      ${certCellsHTML}
       <td class="${supt.cls}">${supt.html}</td>
       <td class="${intAud.cls}">${intAud.html}</td>
       <td class="${navAud.cls}">${navAud.html}</td>
@@ -706,7 +719,7 @@ function fitTableToViewport(rowCount) {
   const rawRowHeight = available / rowCount;
   // Giới hạn chiều cao dòng / cỡ chữ ban đầu trong khoảng hợp lý, tránh chữ quá to khi ít tàu
   let rowHeight = Math.max(38, Math.min(rawRowHeight, 90));
-  let fontSize = Math.max(13, Math.min(rowHeight * 0.28, 17));
+  let fontSize = Math.max(13, Math.min(rowHeight * 0.3, 19));
 
   const root = document.documentElement.style;
   const MIN_FONT = 12;
