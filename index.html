@@ -120,7 +120,8 @@
     flex:1 1 auto;
     min-height:0;
     width:100%;
-    overflow:auto;
+    overflow-x:hidden;
+    overflow-y:auto;
   }
   table{
     width:100%;
@@ -128,7 +129,6 @@
     table-layout:fixed;
     border-collapse:collapse;
     font-size:var(--table-font-size, 1.1rem);
-    min-width:1400px;
   }
   thead th{
     background:var(--navy);
@@ -687,24 +687,52 @@ function render(records) {
 }
 
 // Giãn dòng + tăng cỡ chữ để bảng lấp đầy chiều cao màn hình khi có ít tàu (đỡ trống phía dưới),
-// và tự co lại hợp lý khi có nhiều tàu hoặc màn hình nhỏ hơn.
+// và tự co lại hợp lý khi có nhiều tàu hoặc màn hình nhỏ hơn. Sau khi đặt cỡ chữ/chiều cao dòng
+// ước tính ban đầu, đo TRÀN CHỮ THẬT SỰ trên từng ô (scrollWidth > clientWidth) và bề rộng toàn
+// bảng so với khung chứa, rồi thu nhỏ dần cho tới khi không còn ô nào bị tràn/chèn chữ và không
+// cần scroll ngang lẫn dọc.
 let lastRowCount = 0;
 function fitTableToViewport(rowCount) {
   const scrollEl = document.querySelector(".table-scroll");
   const table = document.getElementById("fleetTable");
-  if (!scrollEl || !table || !rowCount) return;
+  const tbody = document.getElementById("fleetBody");
+  if (!scrollEl || !table || !tbody || !rowCount || !tbody.rows.length) return;
+
   const theadHeight = table.tHead ? table.tHead.offsetHeight : 0;
   const available = scrollEl.clientHeight - theadHeight;
   if (available <= 0) return;
   const rawRowHeight = available / rowCount;
-  // Giới hạn chiều cao dòng để tránh chữ quá to (ít tàu) hoặc quá bé (nhiều tàu)
-  const rowHeight = Math.max(42, Math.min(rawRowHeight, 120));
-  const fontSize = Math.max(14, Math.min(rowHeight * 0.3, 22));
-  document.documentElement.style.setProperty("--row-height", rowHeight + "px");
-  document.documentElement.style.setProperty("--table-font-size", fontSize + "px");
+  // Giới hạn chiều cao dòng / cỡ chữ ban đầu trong khoảng hợp lý, tránh chữ quá to khi ít tàu
+  let rowHeight = Math.max(38, Math.min(rawRowHeight, 90));
+  let fontSize = Math.max(13, Math.min(rowHeight * 0.28, 17));
+
+  const root = document.documentElement.style;
+  const MIN_FONT = 12;
+  const MIN_ROW = 32;
+
+  for (let i = 0; i < 15; i++) {
+    root.setProperty("--row-height", rowHeight + "px");
+    root.setProperty("--table-font-size", fontSize + "px");
+
+    let overflow = table.scrollWidth > scrollEl.clientWidth + 1 ||
+      table.scrollHeight > scrollEl.clientHeight + 1;
+    if (!overflow) {
+      const cells = tbody.querySelectorAll("td");
+      for (let c = 0; c < cells.length; c++) {
+        if (cells[c].scrollWidth > cells[c].clientWidth + 1) { overflow = true; break; }
+      }
+    }
+    if (!overflow || fontSize <= MIN_FONT) break;
+    fontSize = Math.max(MIN_FONT, fontSize - 1);
+    rowHeight = Math.max(MIN_ROW, rowHeight - 4);
+  }
 }
 
-window.addEventListener("resize", () => fitTableToViewport(lastRowCount));
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => fitTableToViewport(lastRowCount), 120);
+});
 
 // ---------- Load ----------
 let isLoading = false;
