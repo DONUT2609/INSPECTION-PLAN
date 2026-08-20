@@ -161,6 +161,10 @@
     vertical-align:top;
     white-space:nowrap;
     line-height:1.5;
+    text-align:center;
+  }
+  tbody td.vessel-name{
+    text-align:left;
   }
   tbody tr:hover{background:#f7f9fc;}
   tbody tr:nth-child(even){background:#fbfcfe;}
@@ -180,6 +184,12 @@
     font-weight:600;
     font-size:0.78rem;
     color:var(--muted);
+  }
+  .check-yes{
+    display:inline-block;
+    color:var(--navy);
+    font-weight:800;
+    font-size:1.05rem;
   }
   .cell-sub{
     display:block;
@@ -287,7 +297,7 @@
             <th rowspan="2">An ninh</th>
             <th rowspan="2">Dung Quất</th>
             <th rowspan="2">PSC gần nhất</th>
-            <th rowspan="2">Remark</th>
+            <th rowspan="2">Drill</th>
           </tr>
           <tr>
             <th>External</th>
@@ -310,7 +320,7 @@
    để phản ánh thay đổi khi file Excel trên Drive được cập nhật.
    ============================================================ */
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTM_YZC4Dbtbe6IsfGXZFSuH4XhDBOqXpbnyoH1DghL3Kue9kaRbBmmUEsLdhdEFg/pub?output=csv";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfBqmSe7nZay8OhuH4EpblhueYbNWzZw0B6DAWjvgt0WEWstt3VLeVonIdZgNhgvTeEhfc7lnMWixn/pub?output=csv";
 const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 phút
 
 // Ngưỡng cảnh báo (số ngày còn lại)
@@ -485,9 +495,9 @@ function certCellHTML(group, today) {
   const days = daysBetween(today, date);
   // Trường hợp mốc nhỏ hơn của 1 khung thời gian nằm ở CỘT KHÁC (vd SMC/ISSC vs MLC
   // của ACF/AVS/AMS: cùng ngày+tháng, khác năm, nhưng mỗi ngày nằm ở 1 cột riêng).
-  // Chỉ khi hôm nay đã đi qua mốc này mới đổi sang báo cam; nếu chưa tới thì vẫn coi
-  // là 1 ngày đến hạn bình thường (đỏ/vàng/xanh theo ngưỡng).
-  if (crossWindowStart && days <= 0) {
+  // Đây không phải hạn thật (hạn thật là ngày lớn hơn ở cột kia), nên luôn báo cam,
+  // không tô đỏ/vàng theo ngưỡng bình thường.
+  if (crossWindowStart) {
     let html = `<span class="window-badge">${formatDate(date)}</span>`;
     if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
     return { cls: "", html };
@@ -499,8 +509,12 @@ function certCellHTML(group, today) {
     html += started
       ? `<span class="window-badge">${formatDate(windowStart)}</span>`
       : `<span class="cell-sub">${formatDate(windowStart)}</span>`;
+  } else if (label) {
+    // Chỉ hiện ghi chú xấp xỉ (vd "05/26-05/27") khi KHÔNG tìm được cặp ngày chính xác
+    // trong cùng cột — nếu đã có cặp ngày chính xác (windowStart) thì ghi chú xấp xỉ
+    // là thừa, gây rối mắt.
+    html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   }
-  if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   return { cls, html };
 }
 
@@ -635,9 +649,15 @@ function render(records) {
     const cgoExt = dateCellHTML(cgoExtGroup, today, false, cgoPlainFlags.extPlain);
     const cgoInt = dateCellHTML(cgoIntGroup, today, false, cgoPlainFlags.intPlain);
     const anNinh = dateCellHTML(mergeDateGroup(rec, 13), today, false);
-    const dungQuat = mergeSimpleMulti(rec, [14, 15]);
+    // Dung Quất (cột 14) là ô checkbox TRUE/FALSE trên Sheet -> hiện dấu tick khi TRUE.
+    // Cột 15 (không có tiêu đề riêng, nằm sát bên) chứa nhãn loại kiểm tra (Sire/Non-Sire/SX).
+    const dungQuatDone = mergeSimple(rec, 14).trim().toUpperCase() === "TRUE";
+    const dungQuatTag = mergeSimple(rec, 15);
     const psc = mergeSimple(rec, 16);
-    const remark = mergeSimple(rec, 17);
+    // DRILL: cột cuối cùng (17) gồm mô tả (vd "Enclosed Space") + ngày đến hạn kèm theo
+    // -> hiển thị như 1 cột ngày bình thường (đỏ/vàng theo ngưỡng 30/60 ngày), giống web cũ,
+    // thay vì chỉ hiện chữ đơn thuần không cảnh báo.
+    const drill = dateCellHTML(mergeDateGroup(rec, 17), today, false);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -653,9 +673,9 @@ function render(records) {
       <td class="${cgoExt.cls}">${cgoExt.html}</td>
       <td class="${cgoInt.cls}">${cgoInt.html}</td>
       <td class="${anNinh.cls}">${anNinh.html}</td>
-      <td class="muted-cell">${escapeHTML(dungQuat)}</td>
+      <td class="muted-cell">${dungQuatDone ? '<span class="check-yes">&#10003;</span> ' : ''}${escapeHTML(dungQuatTag)}</td>
       <td class="cell-text muted-cell">${textCell(psc)}</td>
-      <td class="cell-text muted-cell">${textCell(remark)}</td>
+      <td class="cell-text ${drill.cls}">${drill.html}</td>
     `;
     tbody.appendChild(tr);
   });
