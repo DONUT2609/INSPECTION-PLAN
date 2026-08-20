@@ -124,17 +124,18 @@
   }
   table{
     width:100%;
+    height:100%;
     table-layout:fixed;
     border-collapse:collapse;
-    font-size:0.95rem;
+    font-size:var(--table-font-size, 1.1rem);
     min-width:1400px;
   }
   thead th{
     background:var(--navy);
     color:#eef3fa;
     text-align:left;
-    padding:10px 10px;
-    font-size:0.95rem;
+    padding:14px 12px;
+    font-size:var(--table-font-size, 1.1rem);
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:0.02em;
@@ -150,15 +151,16 @@
   }
   thead tr:last-child th{
     text-align:center;
-    padding-top:4px;
-    padding-bottom:6px;
-    font-size:0.82rem;
+    padding-top:6px;
+    padding-bottom:8px;
+    font-size:calc(var(--table-font-size, 1.1rem) * 0.85);
     background:var(--navy);
   }
   tbody td{
-    padding:10px 6px;
+    padding:0 10px;
+    height:var(--row-height, auto);
     border:1px solid var(--navy);
-    vertical-align:top;
+    vertical-align:middle;
     white-space:nowrap;
     line-height:1.5;
     text-align:center;
@@ -173,7 +175,7 @@
   .vessel-name{
     font-weight:800;
     color:var(--navy);
-    font-size:1.02rem;
+    font-size:calc(var(--table-font-size, 1.1rem) * 1.05);
   }
   .cell-main{
     font-weight:700;
@@ -182,20 +184,20 @@
   }
   .cell-tag{
     font-weight:600;
-    font-size:0.78rem;
+    font-size:0.82em;
     color:var(--muted);
   }
   .check-yes{
     display:inline-block;
     color:var(--navy);
     font-weight:800;
-    font-size:1.05rem;
+    font-size:1.05em;
   }
   .cell-sub{
     display:block;
     font-weight:400;
     color:var(--text);
-    font-size:0.8rem;
+    font-size:0.8em;
     white-space:normal;
     margin-top:2px;
     text-align:center;
@@ -679,7 +681,30 @@ function render(records) {
     `;
     tbody.appendChild(tr);
   });
+
+  lastRowCount = records.length;
+  fitTableToViewport(lastRowCount);
 }
+
+// Giãn dòng + tăng cỡ chữ để bảng lấp đầy chiều cao màn hình khi có ít tàu (đỡ trống phía dưới),
+// và tự co lại hợp lý khi có nhiều tàu hoặc màn hình nhỏ hơn.
+let lastRowCount = 0;
+function fitTableToViewport(rowCount) {
+  const scrollEl = document.querySelector(".table-scroll");
+  const table = document.getElementById("fleetTable");
+  if (!scrollEl || !table || !rowCount) return;
+  const theadHeight = table.tHead ? table.tHead.offsetHeight : 0;
+  const available = scrollEl.clientHeight - theadHeight;
+  if (available <= 0) return;
+  const rawRowHeight = available / rowCount;
+  // Giới hạn chiều cao dòng để tránh chữ quá to (ít tàu) hoặc quá bé (nhiều tàu)
+  const rowHeight = Math.max(42, Math.min(rawRowHeight, 120));
+  const fontSize = Math.max(14, Math.min(rowHeight * 0.3, 22));
+  document.documentElement.style.setProperty("--row-height", rowHeight + "px");
+  document.documentElement.style.setProperty("--table-font-size", fontSize + "px");
+}
+
+window.addEventListener("resize", () => fitTableToViewport(lastRowCount));
 
 // ---------- Load ----------
 let isLoading = false;
