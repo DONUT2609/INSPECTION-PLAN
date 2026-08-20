@@ -20,7 +20,7 @@
     --card:#ffffff;
     --border:#dfe6ee;
     --red:#e60124;
-    --yellow:#ffa800;
+    --yellow:#ffe500;
     --orange:#ff7a00;
   }
   *{box-sizing:border-box;}
@@ -143,7 +143,7 @@
     position:sticky;
     top:0;
     z-index:2;
-    border:1px solid #274a72;
+    border:1px solid var(--navy);
   }
   thead th[colspan]{
     text-align:center;
@@ -157,7 +157,7 @@
   }
   tbody td{
     padding:10px 6px;
-    border:1px solid var(--border);
+    border:1px solid var(--navy);
     vertical-align:top;
     white-space:nowrap;
     line-height:1.5;
@@ -319,6 +319,19 @@ const GENERAL_YELLOW = 60;
 const CERT_RED = 120;   // SMC / ISSC / MLC
 const CERT_YELLOW = 180;
 
+// Lấy ô timestamp ở dòng 1 của sheet: quét từ cuối dòng về đầu (bỏ qua ô A1 là tiêu đề),
+// trả về ô không rỗng cuối cùng. Cách này tự thích ứng nếu cột timestamp bị dịch chuyển
+// (ví dụ do thêm/bớt cột dữ liệu ở giữa bảng), miễn ô timestamp vẫn là ô có dữ liệu cuối
+// cùng trên dòng 1.
+function extractRow1Timestamp(row0) {
+  if (!row0 || row0.length < 2) return null;
+  for (let i = row0.length - 1; i >= 1; i--) {
+    const v = (row0[i] || "").trim();
+    if (v) return v;
+  }
+  return null;
+}
+
 // ---------- CSV parsing (hỗ trợ ô có dấu ngoặc kép / xuống dòng) ----------
 function parseCSV(text) {
   const rows = [];
@@ -464,12 +477,21 @@ function resolveCertGroup(candidates) {
 }
 
 function certCellHTML(group, today) {
-  const { date, windowStart, label } = group;
+  const { date, windowStart, label, crossWindowStart } = group;
   if (!date && !label) return { cls: "", html: "" };
   if (!date) {
     return { cls: "", html: `<span class="cell-sub">${escapeHTML(label)}</span>` };
   }
   const days = daysBetween(today, date);
+  // Trường hợp mốc nhỏ hơn của 1 khung thời gian nằm ở CỘT KHÁC (vd SMC/ISSC vs MLC
+  // của ACF/AVS/AMS: cùng ngày+tháng, khác năm, nhưng mỗi ngày nằm ở 1 cột riêng).
+  // Chỉ khi hôm nay đã đi qua mốc này mới đổi sang báo cam; nếu chưa tới thì vẫn coi
+  // là 1 ngày đến hạn bình thường (đỏ/vàng/xanh theo ngưỡng).
+  if (crossWindowStart && days <= 0) {
+    let html = `<span class="window-badge">${formatDate(date)}</span>`;
+    if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
+    return { cls: "", html };
+  }
   const cls = classify(days, true);
   let html = `<span class="cell-main">${formatDate(date)}</span>`;
   if (windowStart) {
@@ -480,6 +502,26 @@ function certCellHTML(group, today) {
   }
   if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
   return { cls, html };
+}
+
+// Một số tàu (ACF, AVS, AMS...) thể hiện khung thời gian bằng 2 NGÀY Ở 2 CỘT KHÁC NHAU:
+// ngày SMC/ISSC và ngày MLC trùng ngày+tháng nhưng khác năm (vd SMC/ISSC 19/10/2026 và
+// MLC 19/10/2027). Đây cũng là 1 khung thời gian như trường hợp ADM (khác là ADM có cả
+// 2 mốc nằm chung 1 cột MLC). Quy tắc giống hệt: mốc NHỎ hơn chỉ báo cam khi đã trôi qua,
+// mốc LỚN hơn vẫn là hạn thật, tô màu bình thường.
+function applyCrossCertWindow(smcGroup, mlcGroup) {
+  let smc = smcGroup, mlc = mlcGroup;
+  if (smc.date && mlc.date && !smc.windowStart && !mlc.windowStart &&
+      smc.date.getDate() === mlc.date.getDate() &&
+      smc.date.getMonth() === mlc.date.getMonth() &&
+      smc.date.getFullYear() !== mlc.date.getFullYear()) {
+    if (smc.date < mlc.date) {
+      smc = { ...smc, crossWindowStart: true };
+    } else {
+      mlc = { ...mlc, crossWindowStart: true };
+    }
+  }
+  return { smc, mlc };
 }
 
 // CGO AUD có 2 đợt (External / Internal), vẫn hiển thị đủ 2 cột.
@@ -578,8 +620,11 @@ function render(records) {
     const name = cellVal(rec.primary, 0);
     const nextSire = dateCellHTML(mergeDateGroup(rec, 1), today, false);
     const oilMajor = mergeSimple(rec, 2);
-    const smcIssc = certCellHTML(mergeCertGroup(rec, 3, 4), today);
-    const mlc = certCellHTML(mergeCertGroup(rec, 5, 6), today);
+    const smcIsscGroup = mergeCertGroup(rec, 3, 4);
+    const mlcGroup = mergeCertGroup(rec, 5, 6);
+    const crossed = applyCrossCertWindow(smcIsscGroup, mlcGroup);
+    const smcIssc = certCellHTML(crossed.smc, today);
+    const mlc = certCellHTML(crossed.mlc, today);
     const supt = dateCellHTML(mergeDateGroup(rec, 7), today, false);
     const intAud = dateCellHTML(mergeDateGroup(rec, 8), today, false);
     const navAud = dateCellHTML(mergeDateGroup(rec, 9), today, false);
@@ -632,18 +677,17 @@ async function loadData() {
     if (records.length === 0) throw new Error("Không tìm thấy dữ liệu tàu trong CSV");
     render(records);
     statusMsg.textContent = "";
-    // Google có thể trả header Last-Modified phản ánh lần sheet được publish lại gần nhất.
-    // Nếu trình duyệt đọc được thì đó là thời điểm dữ liệu thật sự thay đổi; nếu không có,
-    // phải nói rõ đây chỉ là giờ tải trang, tránh làm người xem tưởng nhầm là giờ cập nhật dữ liệu.
-    const lastModified = res.headers.get("last-modified");
     statusMsg.className = "";
-    const now = new Date();
+    // Dòng đầu tiên của sheet (row 1) có 1 ô ghi timestamp (ví dụ công thức =NOW()),
+    // nằm ở cột cuối cùng có dữ liệu trên dòng đó. Đọc trực tiếp giá trị này thay vì
+    // dựa vào header HTTP Last-Modified (không đáng tin cậy do CORS/cache của Google).
     const tsEl = document.getElementById("bottomTimestamp");
-    if (lastModified) {
-      const d = new Date(lastModified);
-      tsEl.textContent = "Dữ liệu (sheet) cập nhật lúc: " + d.toLocaleString("vi-VN");
+    const stampRaw = extractRow1Timestamp(rows[0]);
+    if (stampRaw) {
+      tsEl.textContent = "Dữ liệu (sheet) cập nhật lúc: " + stampRaw;
     } else {
-      tsEl.textContent = "Trang tải lúc: " + now.toLocaleString("vi-VN") + " (không xác định được giờ sửa file)";
+      const now = new Date();
+      tsEl.textContent = "Trang tải lúc: " + now.toLocaleString("vi-VN") + " (không tìm thấy ô timestamp trên sheet)";
     }
   } catch (err) {
     statusMsg.textContent = "Lỗi tải dữ liệu: " + err.message + " (kiểm tra lại link publish CSV / kết nối mạng).";
