@@ -133,14 +133,15 @@
   thead th{
     background:var(--navy);
     color:#eef3fa;
-    text-align:left;
+    text-align:center;
     padding:14px 12px;
     font-size:var(--table-font-size, 1.1rem);
     font-weight:700;
     text-transform:uppercase;
     letter-spacing:0.02em;
     white-space:normal;
-    word-break:break-word;
+    word-break:normal;
+    overflow-wrap:break-word;
     position:sticky;
     top:0;
     z-index:2;
@@ -166,7 +167,7 @@
     text-align:center;
   }
   tbody td.vessel-name{
-    text-align:left;
+    text-align:center;
   }
   tbody tr:hover{background:#f7f9fc;}
   tbody tr:nth-child(even){background:#fbfcfe;}
@@ -226,6 +227,10 @@
     max-width:200px;
   }
   .muted-cell{color:var(--text);}
+  .cell-oilmajor{
+    font-weight:800;
+    color:#34a853;
+  }
 
   .bottomTimestamp{
     position:fixed;
@@ -681,7 +686,7 @@ function render(records) {
     tr.innerHTML = `
       <td class="vessel-name">${escapeHTML(name)}</td>
       <td class="${nextSire.cls}">${nextSire.html}</td>
-      <td class="muted-cell">${escapeHTML(oilMajor)}</td>
+      <td class="cell-oilmajor">${escapeHTML(oilMajor)}</td>
       ${certCellsHTML}
       <td class="${supt.cls}">${supt.html}</td>
       <td class="${intAud.cls}">${intAud.html}</td>
