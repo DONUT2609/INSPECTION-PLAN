@@ -497,9 +497,11 @@ function certCellHTML(group, today) {
   const days = daysBetween(today, date);
   // Trường hợp mốc nhỏ hơn của 1 khung thời gian nằm ở CỘT KHÁC (vd SMC/ISSC vs MLC
   // của ACF/AVS/AMS: cùng ngày+tháng, khác năm, nhưng mỗi ngày nằm ở 1 cột riêng).
-  // Đây không phải hạn thật (hạn thật là ngày lớn hơn ở cột kia), nên luôn báo cam,
-  // không tô đỏ/vàng theo ngưỡng bình thường.
-  if (crossWindowStart) {
+  // Thời gian/điều kiện cảnh báo (đỏ/vàng/an toàn) vẫn giữ nguyên như bình thường;
+  // CHỈ THÊM: nếu hôm nay đã đi qua mốc nhỏ hơn này rồi thì đổi sang nhãn cam thay vì
+  // đỏ/vàng, để phân biệt đây là mốc mở khung đã qua chứ không phải hạn sắp tới.
+  // Nếu CHƯA tới hạn (như tàu AVS) thì vẫn báo màu theo ngưỡng bình thường, không cam.
+  if (crossWindowStart && days <= 0) {
     let html = `<span class="window-badge">${formatDate(date)}</span>`;
     if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
     return { cls: "", html };
