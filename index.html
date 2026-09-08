@@ -303,7 +303,7 @@
             <th rowspan="2">An ninh</th>
             <th rowspan="2">Dung Quất</th>
             <th rowspan="2">PSC gần nhất</th>
-            <th rowspan="2">Drill</th>
+            <th rowspan="2">Remarks</th>
           </tr>
           <tr>
             <th>External</th>
@@ -676,10 +676,9 @@ function render(records) {
     const dungQuatDone = mergeSimple(rec, 14).trim().toUpperCase() === "TRUE";
     const dungQuatTag = mergeSimple(rec, 15);
     const psc = mergeSimple(rec, 16);
-    // DRILL: cột cuối cùng (17) gồm mô tả (vd "Enclosed Space") + ngày đến hạn kèm theo
-    // -> hiển thị như 1 cột ngày bình thường (đỏ/vàng theo ngưỡng 30/60 ngày), giống web cũ,
-    // thay vì chỉ hiện chữ đơn thuần không cảnh báo.
-    const drill = dateCellHTML(mergeDateGroup(rec, 17), today, false);
+    // REMARKS: cột cuối cùng (17) gồm mô tả (vd lên đà) + ngày dự kiến kèm theo
+    // -> hiển thị như 1 cột ngày bình thường (đỏ/vàng theo ngưỡng 30/60 ngày).
+    const remarks = dateCellHTML(mergeDateGroup(rec, 17), today, false);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -696,7 +695,7 @@ function render(records) {
       <td class="${anNinh.cls}">${anNinh.html}</td>
       <td class="muted-cell">${dungQuatDone ? '<span class="check-yes">&#10003;</span> ' : ''}${escapeHTML(dungQuatTag)}</td>
       <td class="cell-text muted-cell">${textCell(psc)}</td>
-      <td class="cell-text ${drill.cls}">${drill.html}</td>
+      <td class="cell-text ${remarks.cls}">${remarks.html}</td>
     `;
     tbody.appendChild(tr);
   });
