@@ -225,6 +225,9 @@
     white-space:normal;
     max-width:200px;
   }
+  td.cell-remarks{
+    font-size:1.2em;
+  }
   .muted-cell{color:var(--text);}
   .cell-oilmajor{
     font-weight:800;
@@ -436,8 +439,8 @@ function classify(days, isCert) {
   if (days === null || days === undefined) return "";
   const red = isCert ? CERT_RED : GENERAL_RED;
   const yellow = isCert ? CERT_YELLOW : GENERAL_YELLOW;
-  if (days < red) return "cell-red";
-  if (days < yellow) return "cell-yellow";
+  if (days <= red) return "cell-red";
+  if (days <= yellow) return "cell-yellow";
   return ""; // còn hạn an toàn: không tô màu, chữ đen bình thường
 }
 
@@ -695,7 +698,7 @@ function render(records) {
       <td class="${anNinh.cls}">${anNinh.html}</td>
       <td class="muted-cell">${dungQuatDone ? '<span class="check-yes">&#10003;</span> ' : ''}${escapeHTML(dungQuatTag)}</td>
       <td class="cell-text muted-cell">${textCell(psc)}</td>
-      <td class="cell-text ${remarks.cls}">${remarks.html}</td>
+      <td class="cell-text cell-remarks ${remarks.cls}">${remarks.html}</td>
     `;
     tbody.appendChild(tr);
   });
