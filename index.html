@@ -671,7 +671,9 @@ function render(records) {
     const cgoExtGroup = mergeDateGroup(rec, 11);
     const cgoIntGroup = mergeDateGroup(rec, 12);
     const cgoPlainFlags = pickCgoPlainFlags(cgoExtGroup, cgoIntGroup, today);
-    const cgoExt = dateCellHTML(cgoExtGroup, today, false, cgoPlainFlags.extPlain);
+    // External luôn cảnh báo bình thường theo ngưỡng đỏ/vàng (30/60 ngày) như các cột khác,
+    // không còn bị ẩn màu ngay cả khi Internal gần hạn hơn.
+    const cgoExt = dateCellHTML(cgoExtGroup, today, false, false);
     const cgoInt = dateCellHTML(cgoIntGroup, today, false, cgoPlainFlags.intPlain);
     const anNinh = dateCellHTML(mergeDateGroup(rec, 13), today, false);
     // Dung Quất (cột 14) là ô checkbox TRUE/FALSE trên Sheet -> hiện dấu tick khi TRUE.
