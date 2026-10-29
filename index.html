@@ -435,16 +435,16 @@ function resolveDateGroup(candidates) {
 }
 
 // ---------- Render helpers ----------
-function classify(days, isCert) {
+function classify(days, isCert, custom) {
   if (days === null || days === undefined) return "";
-  const red = isCert ? CERT_RED : GENERAL_RED;
-  const yellow = isCert ? CERT_YELLOW : GENERAL_YELLOW;
+  const red = custom ? custom.red : (isCert ? CERT_RED : GENERAL_RED);
+  const yellow = custom ? custom.yellow : (isCert ? CERT_YELLOW : GENERAL_YELLOW);
   if (days <= red) return "cell-red";
   if (days <= yellow) return "cell-yellow";
   return ""; // còn hạn an toàn: không tô màu, chữ đen bình thường
 }
 
-function dateCellHTML(dateGroup, today, isCert, forcePlain) {
+function dateCellHTML(dateGroup, today, isCert, forcePlain, custom) {
   const { date, label, tag } = dateGroup;
   if (!date && !label) return { cls: "", html: "" };
   if (!date) {
@@ -452,7 +452,7 @@ function dateCellHTML(dateGroup, today, isCert, forcePlain) {
     return { cls: "", html: `<span class="cell-sub">${escapeHTML(label)}</span>` };
   }
   const days = daysBetween(today, date);
-  const cls = forcePlain ? "" : classify(days, isCert);
+  const cls = forcePlain ? "" : classify(days, isCert, custom);
   let html = `<span class="cell-main">${formatDate(date)}</span>`;
   if (tag) html += ` <span class="cell-tag">(${escapeHTML(tag)})</span>`;
   if (label) html += `<span class="cell-sub">${escapeHTML(label)}</span>`;
@@ -646,7 +646,10 @@ function render(records) {
 
   records.forEach(rec => {
     const name = cellVal(rec.primary, 0);
-    const nextSire = dateCellHTML(mergeDateGroup(rec, 1), today, false);
+    const nextSireGroup = mergeDateGroup(rec, 1);
+    // DOC VN (khung cửa sổ ±3 tháng): vàng khi còn ≤ 3 tháng (90 ngày), đỏ khi còn ≤ 1 tháng (30 ngày)
+    const isDocVN = /^doc\b/i.test((nextSireGroup.label || "").trim());
+    const nextSire = dateCellHTML(nextSireGroup, today, false, false, isDocVN ? { red: 30, yellow: 90 } : null);
     const oilMajor = mergeSimple(rec, 2);
     const smcIsscGroup = mergeCertGroup(rec, 3, 4);
     let mlcGroup = mergeCertGroup(rec, 5, 6);
