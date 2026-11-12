@@ -659,12 +659,24 @@ function render(records) {
       mlcGroup = smcIsscGroup;
     }
     const crossed = applyCrossCertWindow(smcIsscGroup, mlcGroup);
+    // Tàu CHƯA đánh giá trung gian (ACF, AVS...): 2 mốc của khung cửa sổ nằm ở 2 cột
+    // SMC/ISSC và MLC -> gộp 2 cột thành 1 ô, trình bày giống ô MLC của ADM:
+    // số chính = hạn chót (ngày lớn hơn), bên dưới = ngày mở khung (badge cam khi đã mở).
+    const isCrossWindow = !!(crossed.smc.crossWindowStart || crossed.mlc.crossWindowStart);
+    let windowCell = null;
+    if (isCrossWindow) {
+      const start = crossed.smc.crossWindowStart ? crossed.smc.date : crossed.mlc.date;
+      const end = crossed.smc.crossWindowStart ? crossed.mlc.date : crossed.smc.date;
+      windowCell = certCellHTML({ date: end, windowStart: start, label: "" }, today);
+    }
     const smcIssc = certCellHTML(crossed.smc, today);
     const mlc = certCellHTML(crossed.mlc, today);
     // Khi SMC/ISSC và MLC ra kết quả hiển thị giống hệt nhau (dùng chung chứng nhận) ->
     // gộp thành 1 ô rộng (colspan 2) cho đỡ lặp lại, thay vì hiện y hệt 2 lần.
     const certMerged = !!smcIssc.html && smcIssc.html === mlc.html;
-    const certCellsHTML = certMerged
+    const certCellsHTML = windowCell
+      ? `<td colspan="2" class="${windowCell.cls}">${windowCell.html}</td>`
+      : certMerged
       ? `<td colspan="2" class="${smcIssc.cls}">${smcIssc.html}</td>`
       : `<td class="${smcIssc.cls}">${smcIssc.html}</td><td class="${mlc.cls}">${mlc.html}</td>`;
     const supt = dateCellHTML(mergeDateGroup(rec, 7), today, false);
